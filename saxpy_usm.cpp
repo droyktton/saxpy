@@ -5,7 +5,9 @@ int main(int argc, char **argv)
 {
   std::cout << argv[0] << std::endl;
 
-  size_t N = atoi(argv[1]);
+  size_t N = 1024;
+  if(argc > 1) N = atoi(argv[1]);
+
   float A{2.0};
 
   sycl::queue Q;
@@ -24,15 +26,11 @@ int main(int argc, char **argv)
                    [=](sycl::id<1> i) { X[i] = Y[i] = 1.0 / float(i + 1); });
   });
 
-
-
   auto e_saxpy = Q.submit([&](sycl::handler &h) {
     h.depends_on(e_fill);
     h.parallel_for(sycl::range<1>{N},
                    [=](sycl::id<1> i) { Z[i] = A * X[i] + Y[i]; });
   });
-
-
 
   auto t2 = std::chrono::steady_clock::now(); 
   Q.wait();

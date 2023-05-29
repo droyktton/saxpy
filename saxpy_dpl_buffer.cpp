@@ -13,14 +13,15 @@ int main(int argc, char **argv)
 {
   std::cout << argv[0] << std::endl;
 
-  size_t N = atoi(argv[1]);
+  size_t N = 1024;
+  if(argc > 1) N = atoi(argv[1]);
+
   float A{2.0};
 
   sycl::queue Q;
   std::cout << "\n\nRunning on "
             << Q.get_device().get_info<sycl::info::device::name>() << "\n";
 
-  
   sycl::buffer<float> X{N};
   sycl::buffer<float> Y{N};
   sycl::buffer<float> Z{N};
@@ -41,6 +42,7 @@ int main(int argc, char **argv)
   );
 
   auto polsaxpy = dpl::execution::make_device_policy<class Saxpy>(Q);
+  
   auto e_saxpy = dpl::experimental::transform_async(
     polsaxpy,dpl::begin(X), dpl::begin(X)+N, dpl::begin(Y), dpl::begin(Z), 
     [=](auto x, auto y) { return A * x + y; },e_fill

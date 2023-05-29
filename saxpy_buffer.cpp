@@ -6,7 +6,9 @@ int main(int argc, char **argv)
 {
   std::cout << argv[0] << std::endl;
 
-  size_t N = atoi(argv[1]);
+  size_t N = 1024;
+  if(argc > 1) N = atoi(argv[1]);
+
   float A{2.0};
 
   sycl::queue Q;

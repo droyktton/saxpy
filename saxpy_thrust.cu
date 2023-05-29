@@ -1,10 +1,14 @@
 #include<thrust/device_vector.h>
 #include<thrust/host_vector.h>
 #include <thrust/async/for_each.h>
+#include <thrust/for_each.h>
+#include <thrust/tuple.h>
 #include <thrust/iterator/counting_iterator.h>
 #include <thrust/iterator/zip_iterator.h>
 #include <iostream>
 #include <chrono>
+#include <thrust/functional.h>
+
 
 #define TOL 0.000001
 
@@ -12,9 +16,11 @@ int main(int argc, char **argv)
 {
     std::cout << argv[0] << std::endl;
     
-    int N=atoi(argv[1]);
+    int N = 1024;
+    if(argc > 1) N = atoi(argv[1]);
+  
     float A{2.0};
- 
+    
     thrust::device_vector<float> X(N);
     thrust::device_vector<float> Y(N);
     thrust::device_vector<float> Z(N);
@@ -24,7 +30,7 @@ int main(int argc, char **argv)
     auto e1=thrust::async::for_each(
         thrust::make_zip_iterator(thrust::make_tuple(thrust::make_counting_iterator(0),X.begin(),Y.begin())),
         thrust::make_zip_iterator(thrust::make_tuple(thrust::make_counting_iterator(N),X.end(),Y.end())),
-        [=]__device__ (auto tup)
+        [=] __device__ (auto tup)
         {
             int i=thrust::get<0>(tup);
             thrust::get<1>(tup)=1.0/float(i+1);
@@ -53,7 +59,7 @@ int main(int argc, char **argv)
 
     // check
     for (int i = 0; i < N; i++) {
-    assert(fabs(A * Xh[i] + Yh[i] - Zh[i]) < TOL);
+        assert(fabs(A * Xh[i] + Yh[i] - Zh[i]) < TOL);
     }
 
     std::cout
